@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gomoku Quantum - Premium Light/Dark</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..0,800;1,300..0,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Cờ Caro <span class="title-sub">Gomoku</span></h1>
+        
+        <div class="control-panel">
+            <div class="control-item">
+                <span class="control-label">Bàn cờ:</span>
+                <button id="toggle-size-btn" class="modern-btn">15 x 15</button>
+            </div>
+            
+            <button id="undo-btn" class="icon-btn secondary-glow" title="Quay lại">
+                <i class="fa-solid fa-arrow-rotate-left"></i>
+            </button>
+            
+            <button id="reset-btn" class="icon-btn primary-glow" title="Ván mới">
+                <i class="fa-solid fa-rotate"></i>
+            </button>
+
+            <button id="clean-btn" class="icon-btn danger-glow" title="Xóa tất cả tỷ số">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+
+            <button id="theme-btn" class="icon-btn theme-glow" title="Đổi chế độ Sáng/Tối">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+        </div>
+
+        <div class="turn-dashboard">
+            <div class="player-card active" id="card-X">
+                <span class="avatar X">X</span>
+                <div class="player-info">
+                    <span class="player-name">Người chơi X</span>
+                    <div class="player-score">Thắng: <span id="score-x-win">0</span> <span class="score-sep">|</span> Thua: <span id="score-x-lose">0</span></div>
+                    <span class="player-status">Đang nghĩ...</span>
+                </div>
+            </div>
+            
+            <div class="vs-text">
+                <div class="vs-badge">VS</div>
+                <div class="draw-score">Hòa: <span id="score-draw">0</span></div>
+            </div>
+
+            <div class="player-card" id="card-O">
+                <span class="avatar O">O</span>
+                <div class="player-info">
+                    <span class="player-name">Người chơi O</span>
+                    <div class="player-score">Thắng: <span id="score-o-win">0</span> <span class="score-sep">|</span> Thua: <span id="score-o-lose">0</span></div>
+                    <span class="player-status">Chờ lượt</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="board-wrapper">
+            <div class="board" id="board"></div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        © 2026 Bản quyền thuộc về <span class="footer-author">Nguyễn Hoàng Khoa</span>.
+    </footer>
+
+    <div class="modal" id="winning-modal">
+        <div class="modal-content">
+            <h2 id="winner-text">X Thắng!</h2>
+            <button id="modal-reset-btn">Chơi tiếp</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

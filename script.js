@@ -32,7 +32,7 @@ let scores = JSON.parse(localStorage.getItem('caro_scores')) || {
 
 // ================= CHỨC NĂNG LƯU TRỮ & KHỞI TẠO GIAO DIỆN SÁNG/TỐI =================
 // Kiểm tra bộ nhớ máy tính xem ván trước người chơi để giao diện Sáng hay Tối
-let currentTheme = localStorage.getItem('caro_theme') || 'dark';
+let currentTheme = localStorage.getItem('caro_theme') || 'light';
 
 if (currentTheme === 'light') {
     document.body.classList.add('light-mode');

@@ -12,7 +12,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Cờ Caro <span class="title-sub">Gomoku</span></h1>
+        <h1>Game <span class="title-sub">Caro</span></h1>
         
         <div class="control-panel">
             <div class="control-item">
@@ -73,10 +73,27 @@
 
     <div class="modal" id="winning-modal">
         <div class="modal-content">
-            <h2 id="winner-text">X Thắng!</h2>
-            <button id="modal-reset-btn">Chơi tiếp</button>
+            <div class="modal-icon"><i class="fa-solid fa-trophy"></i></div>
+            <h2 id="winner-text">X Chiến Thắng! 🎉</h2>
+            <div class="modal-buttons">
+                <button id="modal-reset-btn" class="popup-btn-primary">Chơi tiếp</button>
+            </div>
         </div>
     </div>
+
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content-confirm">
+            <div class="confirm-icon" id="confirm-modal-icon"><i class="fa-solid fa-circle-question"></i></div>
+            <h3 id="confirm-modal-title">Xác nhận hành động</h3>
+            <p id="confirm-modal-message">Bạn có chắc chắn muốn thực hiện điều này không?</p>
+            <div class="confirm-buttons">
+                <button id="confirm-btn-cancel" class="popup-btn-secondary">Hủy bỏ</button>
+                <button id="confirm-btn-ok" class="popup-btn-danger">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
 
     <script src="script.js"></script>
 </body>

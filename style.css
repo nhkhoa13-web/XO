@@ -6,7 +6,7 @@
     --color-x: #38bdf8; 
     --color-o: #f43f5e; 
     --cell-bg: rgba(30, 41, 59, 0.7);
-    --cell-border: rgb(0 102 147 / 50%);
+    --cell-border: rgb(0 177 255 / 50%);
     --cell-hover: rgba(56, 189, 248, 0.15);
     --control-panel-bg: rgba(0, 0, 0, 0.4);
     --dashboard-bg: rgba(0, 0, 0, 0.25);
@@ -222,7 +222,7 @@ body.light-mode .score-sep { color: #cbd5e1; }
     opacity: 1;
     background: rgba(56, 189, 248, 0.05);
     border-color: rgba(56, 189, 248, 0.3);
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
 }
 body.light-mode #card-X.active { background: rgba(2, 132, 199, 0.05); border-color: rgba(2, 132, 199, 0.3); }
 #card-X.active .player-status { color: var(--color-x); animation: pulseGlow 1.5s infinite alternate; }
@@ -231,7 +231,7 @@ body.light-mode #card-X.active { background: rgba(2, 132, 199, 0.05); border-col
     opacity: 1;
     background: rgba(244, 63, 94, 0.05);
     border-color: rgba(244, 63, 94, 0.3);
-    box-shadow: 0 0 15px rgba(244, 63, 94, 0.1);
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
 }
 body.light-mode #card-O.active { background: rgba(225, 29, 72, 0.05); border-color: rgba(225, 29, 72, 0.3); }
 #card-O.active .player-status { color: var(--color-o); animation: pulseGlow 1.5s infinite alternate; }
@@ -352,4 +352,113 @@ body.light-mode .modal-content { border-color: rgba(0,0,0,0.05); }
     .vs-text { flex-direction: row; gap: 8px; min-width: 100%; }
     .draw-score { margin-top: 0; }
     .player-card { width: 100%; justify-content: center; }
+}
+/* ================= HỆ THỐNG CSS POP-UP MỚI SIÊU HIỆN ĐẠI ================= */
+
+/* Cấu trúc chung của lớp phủ Modal nền tối mờ */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(2, 6, 12, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    padding: 20px;
+}
+.modal.show { opacity: 1; pointer-events: auto; }
+
+/* Thẻ Modal thông báo Thắng/Thua */
+.modal-content, .modal-content-confirm {
+    background: var(--modal-bg);
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2.5rem 2rem;
+    border-radius: 28px;
+    text-align: center;
+    box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: scale(0.85) translateY(20px);
+    width: 100%;
+    max-width: 380px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+body.light-mode .modal-content, body.light-mode .modal-content-confirm {
+    border-color: rgba(0,0,0,0.06);
+    box-shadow: 0 20px 50px -15px rgba(15, 23, 42, 0.15);
+}
+.modal.show .modal-content, .modal.show .modal-content-confirm { transform: scale(1) translateY(0); }
+
+/* Icons trong pop-up */
+.modal-icon { font-size: 3rem; color: #eab308; margin-bottom: 1rem; animation: floatIcon 2s ease-in-out infinite alternate; }
+.confirm-icon { font-size: 2.5rem; color: var(--color-x); margin-bottom: 1rem; }
+
+@keyframes floatIcon { 0% { transform: translateY(0); } 100% { transform: translateY(-8px); } }
+
+#winner-text { font-size: 1.8rem; font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.5px; }
+#confirm-modal-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
+#confirm-modal-message { font-size: 0.9rem; color: #64748b; margin-bottom: 1.8rem; line-height: 1.5; }
+body.light-mode #confirm-modal-message { color: #475569; }
+
+/* Hệ thống nút bấm đồng bộ trong Pop-up */
+.confirm-buttons, .modal-buttons { display: flex; gap: 12px; width: 100%; }
+.confirm-buttons button, .modal-buttons button {
+    flex: 1; padding: 12px 24px; font-size: 0.9rem; font-weight: 800; border-radius: 100px; cursor: pointer; border: none; transition: var(--smooth-fast);
+}
+
+.popup-btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+.popup-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); }
+
+.popup-btn-secondary {
+    background: rgba(148, 163, 184, 0.15); color: #94a3b8;
+}
+body.light-mode .popup-btn-secondary { background: #e2e8f0; color: #475569; }
+.popup-btn-secondary:hover { background: rgba(148, 163, 184, 0.25); }
+
+.popup-btn-danger {
+    background: linear-gradient(135deg, #ef4444, #b91c1c); color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+.popup-btn-danger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5); }
+
+/* TOAST NOTIFICATION (THÔNG BÁO NHANH CHUYÊN NGHIỆP) */
+.toast-container {
+    position: fixed;
+    top: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; gap: 10px; z-index: 1000; pointer-events: none;
+}
+.toast {
+    background: rgba(15, 23, 42, 0.85);
+    color: #f8fafc;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    transform: translateY(-30px); opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+}
+body.light-mode .toast { background: rgba(255, 255, 255, 0.95); color: #0f172a; border-color: rgba(0,0,0,0.05); box-shadow: 0 10px 25px -5px rgba(15,23,42,0.08); }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast i { color: #10b981; } /* Mặc định icon thông báo màu xanh lá */
+/* Tự động tối ưu hóa đường viền khi map phóng to tối đa */
+.board[data-size="30"] {
+    gap: 0px !important; /* Xóa khoảng cách thô để lưới cờ liền mạch */
+    background-color: var(--cell-border);
+}
+.board[data-size="30"] .cell {
+    border: 0.5px solid rgba(255, 255, 255, 0.04); /* Kẻ vạch mỏng sắc nét tinh tế */
+}
+body.light-mode .board[data-size="30"] .cell {
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
 }

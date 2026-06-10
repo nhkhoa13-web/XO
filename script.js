@@ -9,6 +9,7 @@ const modalResetBtn = document.getElementById('modal-reset-btn');
 const winningModal = document.getElementById('winning-modal');
 const winnerText = document.getElementById('winner-text');
 
+// Định nghĩa chính xác DOM chữa lỗi không hiện pop-up
 const confirmModal = document.getElementById('confirm-modal');
 const confirmTitle = document.getElementById('confirm-modal-title');
 const confirmMessage = document.getElementById('confirm-modal-message');
@@ -32,7 +33,6 @@ const SIZE_OPTIONS = [3, 15, 30];
 let currentSizeIndex = 0; 
 let BOARD_SIZE = SIZE_OPTIONS[currentSizeIndex]; 
 
-// QUẢN LÝ LƯỢT ĐI & CHẾ ĐỘ CHƠI
 let isVsAI = false;           
 let firstPlayerOfMatch = 'X'; 
 let currentPlayer = 'X';      
@@ -44,7 +44,7 @@ let scores = JSON.parse(localStorage.getItem('caro_scores')) || {
     xWin: 0, xLose: 0, oWin: 0, oLose: 0, draw: 0
 };
 
-// ================= BỘ KHỞI TẠO ÂM THANH NÂNG CẤP =================
+// AUDIO BỘ KHỞI TẠO
 let audioCtx = null;
 function playSound(type) {
     try {
@@ -79,7 +79,6 @@ function playSound(type) {
     } catch (e) { console.log(e); }
 }
 
-// ================= GIAO DIỆN TOAST & CONFIRM CUSTOM =================
 function showToast(message, iconClass = 'fa-circle-check') {
     const toast = document.createElement('div');
     toast.classList.add('toast');
@@ -92,24 +91,38 @@ function showToast(message, iconClass = 'fa-circle-check') {
     }, 2500);
 }
 
+// HÀM HIỂN THỊ POP-UP CUSTOM HOẠT ĐỘNG CHUẨN XÁC
 function showConfirmModal(title, message, type = 'primary') {
     playSound('action');
     return new Promise((resolve) => {
-        confirmTitle.textContent = title; confirmMessage.textContent = message;
+        confirmTitle.textContent = title; 
+        confirmMessage.textContent = message;
+        
         if (type === 'danger') {
             confirmIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>';
             confirmBtnOk.className = 'popup-btn-danger';
         } else {
-            confirmIcon.innerHTML = '<i class="fa-solid fa-circle-question" style="color: var(--color-x);"></i>';
+            confirmIcon.innerHTML = '<i class="fa-solid fa-circle-question" style="color: #38bdf8;"></i>';
             confirmBtnOk.className = 'popup-btn-primary';
         }
+        
         confirmModal.classList.add('show');
-        confirmBtnOk.onclick = () => { playSound('action'); confirmModal.classList.remove('show'); resolve(true); };
-        confirmBtnCancel.onclick = () => { playSound('action'); confirmModal.classList.remove('show'); resolve(false); };
+        
+        confirmBtnOk.onclick = () => {
+            playSound('action');
+            confirmModal.classList.remove('show');
+            resolve(true);
+        };
+        
+        confirmBtnCancel.onclick = () => {
+            playSound('action');
+            confirmModal.classList.remove('show');
+            resolve(false);
+        };
     });
 }
 
-// THEME SÁNG TỐI
+// THEME CONTROL
 let currentTheme = localStorage.getItem('caro_theme') || 'dark';
 if (currentTheme === 'light') {
     document.body.classList.add('light-mode'); themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
@@ -127,17 +140,24 @@ themeBtn.addEventListener('click', () => {
     }
 });
 
-// XỬ LÝ CHUYỂN ĐỔI CHẾ ĐỘ CHƠI MÁY / NGƯỜI
+// THAY ĐỔI CHẾ ĐỘ CHƠI CÓ KIỂM TRA POP-UP ĐÚNG LUỒNG ASYNC/AWAIT
 modeBtn.addEventListener('click', async () => {
     playSound('action');
+    // Nếu ván đấu đang diễn ra và có ít nhất 1 nước đi, mới kích hoạt pop-up confirm hỏi
     if (moveHistory.length > 0 && isGameActive) {
-        const resetOk = await showConfirmModal("Đổi chế độ chơi", "Trận đấu đang diễn ra sẽ bị hủy để làm mới chế độ. Bạn đồng ý chứ?");
-        if (!resetOk) return;
+        const resetOk = await showConfirmModal(
+            "Đổi chế độ chơi?", 
+            "Trận đấu kịch tính đang diễn ra sẽ bị hủy bỏ hoàn toàn để áp dụng chế độ mới. Bạn đồng ý chứ?",
+            "danger"
+        );
+        if (!resetOk) return; // Người chơi chọn Hủy bỏ -> dừng luồng giữ nguyên ván cũ
     }
+    
+    // Tiến hành đổi chế độ nếu thỏa mãn điều kiện
     isVsAI = !isVsAI;
     if (isVsAI) {
         modeBtn.textContent = "Máy"; modeBtn.className = "modern-btn mode-pve";
-        nameO.textContent = "Siêu Máy AI 🤖"; showToast("Đã kích hoạt chế độ đấu với Máy AI siêu cấp!", "fa-robot");
+        nameO.textContent = "Siêu Máy AI 🤖"; showToast("Đã kích hoạt đấu với Máy AI siêu cấp!", "fa-robot");
     } else {
         modeBtn.textContent = "Người"; modeBtn.className = "modern-btn mode-pvp";
         nameO.textContent = "Người chơi O"; showToast("Đã chuyển về chế độ 2 người chơi PvP!", "fa-user-group");
@@ -207,22 +227,12 @@ function makeMove(row, col, cellElement) {
         return;
     }
 
-    // --- SỬA LOGIC KHI HẾT Ô TRỐNG (XỬ LÝ RIÊNG MAP 3x3 CHỐNG PHÓNG TO) ---
     if (boardData.flat().every(cell => cell !== '')) {
         if (BOARD_SIZE === 3 || BOARD_SIZE === 30) {
-            // Map 3x3 hoặc Map cực đại 30x30 sẽ báo Hòa luôn
-            isGameActive = false; 
-            cardX.classList.remove('active'); 
-            cardO.classList.remove('active');
-            document.querySelector('#card-X .player-status').textContent = "HÒA";
-            document.querySelector('#card-O .player-status').textContent = "HÒA";
-            
-            scores.draw++; 
-            localStorage.setItem('caro_scores', JSON.stringify(scores)); 
-            displayScores();
+            isGameActive = false; cardX.classList.remove('active'); cardO.classList.remove('active');
+            scores.draw++; localStorage.setItem('caro_scores', JSON.stringify(scores)); displayScores();
             setTimeout(() => showWinner("Trận đấu Hòa! 🤝"), 200);
         } else {
-            // Map 15x15 thì mới tự động mở rộng lên 30x30
             showToast("Bàn cờ đã đầy! Đang tự động mở rộng không gian ván đấu...", "fa-expand");
             setTimeout(() => expandBoardSize(), 800);
         }
@@ -237,11 +247,9 @@ function makeMove(row, col, cellElement) {
     }
 }
 
-// ================= THUẬT TOÁN ĐÁNH CỜ AI THÔNG MINH (HEURISTIC) =================
+// AI THÔNG MINH
 function makeAIMove() {
-    let bestScore = -1;
-    let bestMoves = [];
-
+    let bestScore = -1; let bestMoves = [];
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
             if (boardData[r][c] === '') {
@@ -253,16 +261,11 @@ function makeAIMove() {
                 let centerBonus = (center - Math.abs(r - center)) + (center - Math.abs(c - center));
                 totalScore += centerBonus * 0.1;
 
-                if (totalScore > bestScore) {
-                    bestScore = totalScore;
-                    bestMoves = [{r, c}];
-                } else if (totalScore === bestScore) {
-                    bestMoves.push({r, c});
-                }
+                if (totalScore > bestScore) { bestScore = totalScore; bestMoves = [{r, c}]; } 
+                else if (totalScore === bestScore) { bestMoves.push({r, c}); }
             }
         }
     }
-
     if (bestMoves.length > 0) {
         const chosenMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
         makeMove(chosenMove.r, chosenMove.c, null);
@@ -270,14 +273,11 @@ function makeAIMove() {
 }
 
 function evaluatePoint(r, c, player) {
-    const opponent = player === 'X' ? 'O' : 'X';
     const directions = [ {dr:0, dc:1}, {dr:1, dc:0}, {dr:1, dc:1}, {dr:1, dc:-1} ];
     let totalScore = 0;
 
     for (let {dr, dc} of directions) {
-        let count = 1;
-        let openEnds = 0;
-
+        let count = 1; let openEnds = 0;
         let i = 1;
         while (true) {
             let nr = r + dr * i; let nc = c + dc * i;
@@ -287,7 +287,6 @@ function evaluatePoint(r, c, player) {
                 else { break; } 
             } else { break; }
         }
-
         let j = 1;
         while (true) {
             let nr = r - dr * j; let nc = c - dc * j;
@@ -299,21 +298,9 @@ function evaluatePoint(r, c, player) {
         }
 
         if (count >= 5) totalScore += 100000;              
-        else if (count === 4) {
-            if (openEnds === 2) totalScore += 10000;       
-            else if (openEnds === 1) totalScore += 2000;   
-        } 
-        else if (count === 3) {
-            if (openEnds === 2) totalScore += 1500;        
-            else if (openEnds === 1) totalScore += 400;
-        } 
-        else if (count === 2) {
-            if (openEnds === 2) totalScore += 200;
-            else if (openEnds === 1) totalScore += 50;
-        }
-        else if (count === 1) {
-            if (openEnds === 2) totalScore += 10;
-        }
+        else if (count === 4) { if (openEnds === 2) totalScore += 10000; else if (openEnds === 1) totalScore += 2000; } 
+        else if (count === 3) { if (openEnds === 2) totalScore += 1500; else if (openEnds === 1) totalScore += 400; } 
+        else if (count === 2) { if (openEnds === 2) totalScore += 200; else if (openEnds === 1) totalScore += 50; }
     }
     return totalScore;
 }
@@ -328,17 +315,12 @@ function expandBoardSize() {
     const offsetCol = Math.floor((BOARD_SIZE - oldSize) / 2);
 
     for (let r = 0; r < oldSize; r++) {
-        for (let c = 0; c < oldSize; c++) {
-            newBoardData[r + offsetRow][c + offsetCol] = boardData[r][c];
-        }
+        for (let c = 0; c < oldSize; c++) { newBoardData[r + offsetRow][c + offsetCol] = boardData[r][c]; }
     }
 
-    moveHistory = moveHistory.map(move => ({
-        row: move.row + offsetRow, col: move.col + offsetCol, player: move.player
-    }));
-
+    moveHistory = moveHistory.map(move => ({ row: move.row + offsetRow, col: move.col + offsetCol, player: move.player }));
     boardData = newBoardData; drawBoardElements();
-    showToast(`Đã dịch chuyển ván đấu vào tâm map lớn ${BOARD_SIZE}x${BOARD_SIZE}!`, "fa-up-down-left-right");
+    showToast(`Đã dịch chuyển trận đấu vào tâm map lớn ${BOARD_SIZE}x${BOARD_SIZE}!`, "fa-up-down-left-right");
 }
 
 toggleSizeBtn.addEventListener('click', async () => {
@@ -352,9 +334,8 @@ toggleSizeBtn.addEventListener('click', async () => {
         return;
     }
 
-    if (isGameActive && moveHistory.length > 0) {
-        expandBoardSize();
-    } else {
+    if (isGameActive && moveHistory.length > 0) { expandBoardSize(); } 
+    else {
         currentSizeIndex = (currentSizeIndex + 1) % SIZE_OPTIONS.length;
         BOARD_SIZE = SIZE_OPTIONS[currentSizeIndex];
         firstPlayerOfMatch = 'X'; resetGame();
@@ -368,31 +349,24 @@ undoBtn.addEventListener('click', async () => {
 
     const confirmResult = await showConfirmModal("Quay lại nước đi", "Bạn có chắc muốn rút lại nước đi không?", "primary");
     if (confirmResult) {
-        let lastMove = moveHistory.pop();
-        boardData[lastMove.row][lastMove.col] = '';
+        let lastMove = moveHistory.pop(); boardData[lastMove.row][lastMove.col] = '';
         let cellElement = document.querySelector(`[data-row='${lastMove.row}'][data-col='${lastMove.col}']`);
         if (cellElement) { cellElement.textContent = ''; cellElement.className = 'cell'; }
 
         if (isVsAI && moveHistory.length > 0) {
-            lastMove = moveHistory.pop();
-            boardData[lastMove.row][lastMove.col] = '';
+            lastMove = moveHistory.pop(); boardData[lastMove.row][lastMove.col] = '';
             cellElement = document.querySelector(`[data-row='${lastMove.row}'][data-col='${lastMove.col}']`);
             if (cellElement) { cellElement.textContent = ''; cellElement.className = 'cell'; }
         }
-
-        currentPlayer = 'X'; 
-        updateTurnIndicator();
-        showToast("Đã rút lại nước đi!");
+        currentPlayer = 'X'; updateTurnIndicator(); showToast("Đã rút lại nước đi!");
     }
 });
 
 resetBtn.addEventListener('click', async () => {
     if (isGameActive && moveHistory.length > 0) {
-        const confirmResult = await showConfirmModal("Hủy trận đấu hiện tại", "Ván đấu chưa kết thúc. Bạn có muốn bắt đầu ván mới?", "primary");
+        const confirmResult = await showConfirmModal("Hủy trận hiện tại", "Ván đấu chưa kết thúc. Bạn có muốn bắt đầu ván mới?", "primary");
         if (confirmResult) { resetGame(); showToast("Đã khởi tạo ván đấu mới!"); }
-    } else {
-        playSound('action'); resetGame();
-    }
+    } else { playSound('action'); resetGame(); }
 });
 
 cleanBtn.addEventListener('click', async () => {
@@ -400,8 +374,7 @@ cleanBtn.addEventListener('click', async () => {
     if (confirmResult) {
         scores = { xWin: 0, xLose: 0, oWin: 0, oLose: 0, draw: 0 };
         localStorage.setItem('caro_scores', JSON.stringify(scores));
-        firstPlayerOfMatch = 'X'; resetGame();
-        showToast("Đã xóa sạch bảng xếp hạng!", "fa-trash-can");
+        firstPlayerOfMatch = 'X'; resetGame(); showToast("Đã xóa sạch bảng xếp hạng!", "fa-trash-can");
     }
 });
 
@@ -427,16 +400,12 @@ function checkWin(r, c) {
         let i = 1;
         while (true) {
             let nr = r + dr * i; let nc = c + dc * i;
-            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && boardData[nr][nc] === player) {
-                count++; winCells.push([nr, nc]); i++;
-            } else { break; }
+            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && boardData[nr][nc] === player) { count++; winCells.push([nr, nc]); i++; } else { break; }
         }
         let j = 1;
         while (true) {
             let nr = r - dr * j; let nc = c - dc * j;
-            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && boardData[nr][nc] === player) {
-                count++; winCells.push([nr, nc]); j++;
-            } else { break; }
+            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && boardData[nr][nc] === player) { count++; winCells.push([nr, nc]); j++; } else { break; }
         }
         if (count >= targetCount) { highlightWinCells(winCells); return true; }
     }
@@ -454,8 +423,7 @@ function showWinner(message) {
     winnerText.textContent = message;
     const modalIcon = winningModal.querySelector('.modal-icon');
     if (message.includes("Hòa")) {
-        winnerText.style.color = 'var(--text-color)';
-        modalIcon.innerHTML = '<i class="fa-solid fa-handshake" style="color: #94a3b8;"></i>';
+        winnerText.style.color = 'var(--text-color)'; modalIcon.innerHTML = '<i class="fa-solid fa-handshake" style="color: #94a3b8;"></i>';
     } else {
         winnerText.style.color = currentPlayer === 'X' ? 'var(--color-x)' : 'var(--color-o)';
         modalIcon.innerHTML = message.includes("🤖") ? '<i class="fa-solid fa-robot" style="color: #a855f7;"></i>' : '<i class="fa-solid fa-trophy" style="color: #eab308;"></i>';
@@ -464,18 +432,11 @@ function showWinner(message) {
 }
 
 function resetGame() {
-    currentPlayer = firstPlayerOfMatch; 
-    isGameActive = true;
-    winningModal.classList.remove('show');  
-    updateTurnIndicator();
-    createBoard();
+    currentPlayer = firstPlayerOfMatch; isGameActive = true;
+    winningModal.classList.remove('show'); updateTurnIndicator(); createBoard();
     // showToast(`Trận mới bắt đầu! Lượt đi trước: ${currentPlayer}`, currentPlayer === 'X' ? 'fa-xmark' : 'fa-circle');
-
-    if (isVsAI && currentPlayer === 'O') {
-        setTimeout(() => makeAIMove(), 500);
-    }
+    if (isVsAI && currentPlayer === 'O') { setTimeout(() => makeAIMove(), 500); }
 }
 
-// KHỞI CHẠY GAME
 createBoard();
 modalResetBtn.addEventListener('click', () => { playSound('action'); resetGame(); });

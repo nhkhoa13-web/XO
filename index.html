@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cờ XO Truyền Thống</title>
+    <title>Gomoku Quantum</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..0,800;1,300..0,800&display=swap" rel="stylesheet">
@@ -23,28 +23,26 @@
                 <!-- <span class="control-label">Chế độ:</span> -->
                 <button id="mode-btn" class="modern-btn mode-pvp" title="Bấm để đổi chế độ">Người</button>
             </div>
+            
             <button id="undo-btn" class="icon-btn secondary-glow" title="Quay lại">
                 <i class="fa-solid fa-arrow-rotate-left"></i>
             </button>
-            
-            <button id="reset-btn" class="icon-btn primary-glow" title="Ván mới">
+            <button id="reset-btn" class="icon-btn secondary-glow" title="Ván mới">
                 <i class="fa-solid fa-rotate"></i>
             </button>
-
-            <button id="clean-btn" class="icon-btn danger-glow" title="Xóa tất cả tỷ số">
+            <button id="clean-btn" class="icon-btn danger-glow" title="Xóa điểm">
                 <i class="fa-solid fa-trash-can"></i>
             </button>
-
-            <button id="theme-btn" class="icon-btn theme-glow" title="Đổi chế độ Sáng/Tối">
+            <button id="theme-btn" class="icon-btn secondary-glow" title="Đổi giao diện">
                 <i class="fa-solid fa-moon"></i>
             </button>
         </div>
 
-        <div class="turn-dashboard">
+        <div class="dashboard">
             <div class="player-card active" id="card-X">
                 <span class="avatar X">X</span>
                 <div class="player-info">
-                    <span class="player-name">Người chơi X</span>
+                    <span class="player-name" id="name-X">Người chơi X</span>
                     <div class="player-score">Thắng: <span id="score-x-win">0</span> <span class="score-sep">|</span> Thua: <span id="score-x-lose">0</span></div>
                     <span class="player-status">Đang nghĩ...</span>
                 </div>
@@ -58,7 +56,7 @@
             <div class="player-card" id="card-O">
                 <span class="avatar O">O</span>
                 <div class="player-info">
-                    <span class="player-name">Người chơi O</span>
+                    <span class="player-name" id="name-O">Người chơi O</span>
                     <div class="player-score">Thắng: <span id="score-o-win">0</span> <span class="score-sep">|</span> Thua: <span id="score-o-lose">0</span></div>
                     <span class="player-status">Chờ lượt</span>
                 </div>
@@ -91,7 +89,7 @@
             <p id="confirm-modal-message">Bạn có chắc chắn muốn thực hiện điều này không?</p>
             <div class="confirm-buttons">
                 <button id="confirm-btn-cancel" class="popup-btn-secondary">Hủy bỏ</button>
-                <button id="confirm-btn-ok" class="popup-btn-danger">Đồng ý</button>
+                <button id="confirm-btn-ok" class="popup-btn-primary">Đồng ý</button>
             </div>
         </div>
     </div>

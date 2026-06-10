@@ -161,7 +161,7 @@ body.light-mode .icon-btn { border-color: rgba(0,0,0,0.05); }
 .icon-btn:active { transform: translateY(1px); }
 
 /* TURN DASHBOARD */
-.turn-dashboard {
+.dashboard  {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -175,7 +175,6 @@ body.light-mode .icon-btn { border-color: rgba(0,0,0,0.05); }
     transition: background 0.4s ease;
 }
 
-body.light-mode .turn-dashboard { border-color: rgba(0,0,0,0.02); }
 .vs-text { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 45px; }
 .vs-badge { font-size: 0.7rem; font-weight: 900; background: #334155; color: #94a3b8; padding: 2px 8px; border-radius: 100px; }
 body.light-mode .vs-badge { background: #e2e8f0; color: #64748b; }
@@ -348,7 +347,6 @@ body.light-mode .modal-content { border-color: rgba(0,0,0,0.05); }
 /* RESPONSIVE TRƯỜNG HỢP MÀN HÌNH SIÊU NHỎ (DƯỚI 360PX) */
 @media (max-width: 360px) {
     .container { padding: 1rem; }
-    .turn-dashboard { flex-direction: column; gap: 8px; border-radius: 16px; }
     .vs-text { flex-direction: row; gap: 8px; min-width: 100%; }
     .draw-score { margin-top: 0; }
     .player-card { width: 100%; justify-content: center; }
@@ -486,3 +484,89 @@ body.light-mode .board[data-size="30"] .cell {
 body.light-mode .board[data-size="30"] .cell {
     border: 0.5px solid rgba(0, 0, 0, 0.05);
 }
+/* --- CSS CHO ĐOẠN POP-UP XÁC NHẬN CUSTOM --- */
+.modal-content-confirm {
+    background: var(--modal-bg);
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2.5rem;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.4);
+    max-width: 400px;
+    width: 90%;
+    transform: scale(0.9);
+    transition: var(--smooth-elastic);
+}
+body.light-mode .modal-content-confirm {
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.15);
+}
+.modal.show .modal-content-confirm {
+    transform: scale(1);
+}
+.confirm-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+.modal-content-confirm h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+}
+.modal-content-confirm p {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+.confirm-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+.popup-btn-secondary {
+    background: rgba(148, 163, 184, 0.15);
+    color: var(--text-color);
+    border: none;
+    padding: 0.8rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--smooth-fast);
+}
+.popup-btn-secondary:hover {
+    background: rgba(148, 163, 184, 0.25);
+}
+.popup-btn-primary {
+    background: linear-gradient(135deg, #38bdf8, #0284c7);
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--smooth-fast);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+.popup-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+}
+.popup-btn-danger {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--smooth-fast);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+.popup-btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+.mode-pvp { background: linear-gradient(135deg, #10b981, #059669) !important; color: #fff !important; font-weight: 700; }
+.mode-pve { background: linear-gradient(135deg, #a855f7, #7e22ce) !important; color: #fff !important; font-weight: 700; box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }

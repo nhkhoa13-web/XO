@@ -136,10 +136,10 @@ modeBtn.addEventListener('click', async () => {
     }
     isVsAI = !isVsAI;
     if (isVsAI) {
-        modeBtn.textContent = "Người vs Máy AI"; modeBtn.className = "modern-btn mode-pve";
+        modeBtn.textContent = "Máy"; modeBtn.className = "modern-btn mode-pve";
         nameO.textContent = "Siêu Máy AI 🤖"; showToast("Đã kích hoạt chế độ đấu với Máy AI siêu cấp!", "fa-robot");
     } else {
-        modeBtn.textContent = "Người vs Người"; modeBtn.className = "modern-btn mode-pvp";
+        modeBtn.textContent = "Người"; modeBtn.className = "modern-btn mode-pvp";
         nameO.textContent = "Người chơi O"; showToast("Đã chuyển về chế độ 2 người chơi PvP!", "fa-user-group");
     }
     firstPlayerOfMatch = 'X';
@@ -466,10 +466,10 @@ function showWinner(message) {
 function resetGame() {
     currentPlayer = firstPlayerOfMatch; 
     isGameActive = true;
-    winningModal.classList.remove('show');
+    winningModal.classList.remove('show');  
     updateTurnIndicator();
     createBoard();
-    showToast(`Trận mới bắt đầu! Lượt đi trước: ${currentPlayer}`, currentPlayer === 'X' ? 'fa-xmark' : 'fa-circle');
+    // showToast(`Trận mới bắt đầu! Lượt đi trước: ${currentPlayer}`, currentPlayer === 'X' ? 'fa-xmark' : 'fa-circle');
 
     if (isVsAI && currentPlayer === 'O') {
         setTimeout(() => makeAIMove(), 500);

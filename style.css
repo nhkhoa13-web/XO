@@ -112,7 +112,7 @@ body.light-mode .control-panel {
 }
 
 .control-item { display: flex; align-items: center; gap: 6px; }
-.control-label { font-weight: 700; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+/* .control-label { font-weight: 700; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; } */
 
 .modern-btn {
     background: var(--cell-bg);
@@ -458,6 +458,30 @@ body.light-mode .toast { background: rgba(255, 255, 255, 0.95); color: #0f172a; 
 }
 .board[data-size="30"] .cell {
     border: 0.5px solid rgba(255, 255, 255, 0.04); /* Kẻ vạch mỏng sắc nét tinh tế */
+}
+body.light-mode .board[data-size="30"] .cell {
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+}
+/* Màu sắc bổ sung cho nút chọn chế độ đấu Máy */
+.mode-pvp {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: #fff !important;
+    font-weight: 700;
+}
+.mode-pve {
+    background: linear-gradient(135deg, #a855f7, #7e22ce) !important;
+    color: #fff !important;
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+/* Hiệu ứng mờ viền khi kích thước 30x30 phóng to */
+.board[data-size="30"] {
+    gap: 0px !important;
+    background-color: var(--cell-border);
+}
+.board[data-size="30"] .cell {
+    border: 0.5px solid rgba(255, 255, 255, 0.04);
 }
 body.light-mode .board[data-size="30"] .cell {
     border: 0.5px solid rgba(0, 0, 0, 0.05);

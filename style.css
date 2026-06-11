@@ -288,7 +288,31 @@ body.light-mode #card-O.active { background: rgba(225, 29, 72, 0.05); border-col
 #card-O.active .player-status { color: var(--color-o); animation: pulseGlow 1.5s infinite alternate; }
 
 @keyframes pulseGlow { 0% { opacity: 0.6; } 100% { opacity: 1; text-shadow: 0 0 8px currentColor; } }
+/* Style cho nút đổi chế độ dạng Icon */
+#mode-btn {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
+/* Khi kích hoạt chế độ Máy AI - Nút sẽ chuyển sang tông màu tím huyền bí */
+#mode-btn.mode-pve {
+    background: rgba(168, 85, 247, 0.15) !important;
+    color: #a855f7 !important;
+    border-color: rgba(168, 85, 247, 0.4) !important;
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.25);
+}
+
+#mode-btn.mode-pve:hover {
+    background: rgba(168, 85, 247, 0.25) !important;
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Hiệu ứng xoay nhẹ icon khi click đổi chế độ */
+#mode-btn i {
+    transition: transform 0.3s ease;
+}
+#mode-btn:active i {
+    transform: scale(0.8) rotate(15deg);
+}
 /* BOARD CONTAINER & WRAPPER - TỐI ƯU MOBILE */
 /* --- 1. KHỐI BỌC BÀN CỜ CHUNG (SỬA LẠI ĐỂ ẨN HOÀN TOÀN THANH CUỘN) --- */
 .board-wrapper {

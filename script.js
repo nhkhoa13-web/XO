@@ -124,21 +124,35 @@ themeBtn.addEventListener('click', () => {
     }
 });
 
+// Tìm và thay thế sự kiện click của modeBtn bằng đoạn mã này:
 modeBtn.addEventListener('click', async () => {
     playSound('action');
     if (moveHistory.length > 0 && isGameActive) {
-        const resetOk = await showConfirmModal("Đổi chế độ chơi?", "Trận đấu đang diễn ra sẽ bị hủy bỏ hoàn toàn để áp dụng chế độ mới. Bạn đồng ý chứ?", "danger");
+        const resetOk = await showConfirmModal(
+            "Đổi chế độ chơi?", 
+            "Trận đấu đang diễn ra sẽ bị hủy bỏ hoàn toàn để áp dụng chế độ mới. Bạn đồng ý chứ?", 
+            "danger"
+        );
         if (!resetOk) return;
     }
     
+    const modeIcon = document.getElementById('mode-icon');
     isVsAI = !isVsAI;
+    
     if (isVsAI) {
-        modeBtn.textContent = "Máy"; modeBtn.className = "modern-btn mode-pve";
-        nameO.textContent = "Siêu Máy AI 🤖"; showToast("Kích hoạt Siêu Máy AI", "fa-robot");
+        // Chuyển sang chế độ Máy AI
+        modeBtn.className = "icon-btn mode-pve";
+        modeIcon.className = "fa-solid fa-robot"; // Đổi sang icon robot
+        nameO.textContent = "Siêu Máy AI 🤖"; 
+        showToast("Kích hoạt Siêu Máy AI!", "fa-robot");
     } else {
-        modeBtn.textContent = "Người"; modeBtn.className = "modern-btn mode-pvp";
-        nameO.textContent = "Người chơi O"; showToast("Đã chuyển về chế độ PvP!", "fa-user-group");
+        // Quay về chế độ Người vs Người
+        modeBtn.className = "icon-btn secondary-glow mode-pvp";
+        modeIcon.className = "fa-solid fa-user-group"; // Đổi lại icon nhóm người
+        nameO.textContent = "Người chơi O"; 
+        showToast("Đã chuyển về chế độ PvP!", "fa-user-group");
     }
+    
     firstPlayerOfMatch = 'X';
     resetGame();
 });

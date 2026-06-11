@@ -9,7 +9,6 @@ const modalResetBtn = document.getElementById('modal-reset-btn');
 const winningModal = document.getElementById('winning-modal');
 const winnerText = document.getElementById('winner-text');
 
-// Định nghĩa chính xác DOM chữa lỗi không hiện pop-up
 const confirmModal = document.getElementById('confirm-modal');
 const confirmTitle = document.getElementById('confirm-modal-title');
 const confirmMessage = document.getElementById('confirm-modal-message');
@@ -27,10 +26,9 @@ const txtXWin = document.getElementById('score-x-win');
 const txtXLose = document.getElementById('score-x-lose');
 const txtOWin = document.getElementById('score-o-win');
 const txtOLose = document.getElementById('score-o-lose');
-const txtDraw = document.getElementById('score-draw');
 
 const SIZE_OPTIONS = [3, 15, 30]; 
-let currentSizeIndex = 0; 
+let currentSizeIndex = 1; 
 let BOARD_SIZE = SIZE_OPTIONS[currentSizeIndex]; 
 
 let isVsAI = false;           
@@ -40,8 +38,9 @@ let isGameActive = true;
 let boardData = [];
 let moveHistory = [];
 
+// ĐÃ BỎ SCORE ĐOẠN HÒA
 let scores = JSON.parse(localStorage.getItem('caro_scores')) || {
-    xWin: 0, xLose: 0, oWin: 0, oLose: 0, draw: 0
+    xWin: 0, xLose: 0, oWin: 0, oLose: 0
 };
 
 // AUDIO BỘ KHỞI TẠO
@@ -91,13 +90,11 @@ function showToast(message, iconClass = 'fa-circle-check') {
     }, 2500);
 }
 
-// HÀM HIỂN THỊ POP-UP CUSTOM HOẠT ĐỘNG CHUẨN XÁC
 function showConfirmModal(title, message, type = 'primary') {
     playSound('action');
     return new Promise((resolve) => {
         confirmTitle.textContent = title; 
         confirmMessage.textContent = message;
-        
         if (type === 'danger') {
             confirmIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>';
             confirmBtnOk.className = 'popup-btn-danger';
@@ -105,20 +102,9 @@ function showConfirmModal(title, message, type = 'primary') {
             confirmIcon.innerHTML = '<i class="fa-solid fa-circle-question" style="color: #38bdf8;"></i>';
             confirmBtnOk.className = 'popup-btn-primary';
         }
-        
         confirmModal.classList.add('show');
-        
-        confirmBtnOk.onclick = () => {
-            playSound('action');
-            confirmModal.classList.remove('show');
-            resolve(true);
-        };
-        
-        confirmBtnCancel.onclick = () => {
-            playSound('action');
-            confirmModal.classList.remove('show');
-            resolve(false);
-        };
+        confirmBtnOk.onclick = () => { playSound('action'); confirmModal.classList.remove('show'); resolve(true); };
+        confirmBtnCancel.onclick = () => { playSound('action'); confirmModal.classList.remove('show'); resolve(false); };
     });
 }
 
@@ -133,34 +119,25 @@ themeBtn.addEventListener('click', () => {
     playSound('action'); document.body.classList.toggle('light-mode');
     if (document.body.classList.contains('light-mode')) {
         localStorage.setItem('caro_theme', 'light'); themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-        showToast("Đã chuyển sang giao diện Sáng", "fa-sun");
     } else {
         localStorage.setItem('caro_theme', 'dark'); themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-        showToast("Đã chuyển sang giao diện Tối", "fa-moon");
     }
 });
 
-// THAY ĐỔI CHẾ ĐỘ CHƠI CÓ KIỂM TRA POP-UP ĐÚNG LUỒNG ASYNC/AWAIT
 modeBtn.addEventListener('click', async () => {
     playSound('action');
-    // Nếu ván đấu đang diễn ra và có ít nhất 1 nước đi, mới kích hoạt pop-up confirm hỏi
     if (moveHistory.length > 0 && isGameActive) {
-        const resetOk = await showConfirmModal(
-            "Đổi chế độ chơi?", 
-            "Trận đấu kịch tính đang diễn ra sẽ bị hủy bỏ hoàn toàn để áp dụng chế độ mới. Bạn đồng ý chứ?",
-            "danger"
-        );
-        if (!resetOk) return; // Người chơi chọn Hủy bỏ -> dừng luồng giữ nguyên ván cũ
+        const resetOk = await showConfirmModal("Đổi chế độ chơi?", "Trận đấu đang diễn ra sẽ bị hủy bỏ hoàn toàn để áp dụng chế độ mới. Bạn đồng ý chứ?", "danger");
+        if (!resetOk) return;
     }
     
-    // Tiến hành đổi chế độ nếu thỏa mãn điều kiện
     isVsAI = !isVsAI;
     if (isVsAI) {
         modeBtn.textContent = "Máy"; modeBtn.className = "modern-btn mode-pve";
-        nameO.textContent = "Siêu Máy AI 🤖"; showToast("Đã kích hoạt đấu với Máy AI siêu cấp!", "fa-robot");
+        nameO.textContent = "Siêu Máy AI 🤖"; showToast("Kích hoạt Siêu Máy AI", "fa-robot");
     } else {
         modeBtn.textContent = "Người"; modeBtn.className = "modern-btn mode-pvp";
-        nameO.textContent = "Người chơi O"; showToast("Đã chuyển về chế độ 2 người chơi PvP!", "fa-user-group");
+        nameO.textContent = "Người chơi O"; showToast("Đã chuyển về chế độ PvP!", "fa-user-group");
     }
     firstPlayerOfMatch = 'X';
     resetGame();
@@ -169,7 +146,6 @@ modeBtn.addEventListener('click', async () => {
 function displayScores() {
     txtXWin.textContent = scores.xWin; txtXLose.textContent = scores.xLose;
     txtOWin.textContent = scores.oWin; txtOLose.textContent = scores.oLose;
-    txtDraw.textContent = scores.draw;
 }
 
 function drawBoardElements() {
@@ -215,6 +191,9 @@ function makeMove(row, col, cellElement) {
     cellElement.textContent = currentPlayer;
     cellElement.classList.add(currentPlayer.toLowerCase());
 
+    document.querySelectorAll('.cell').forEach(c => c.classList.remove('last-move'));
+    cellElement.classList.add('last-move');
+
     if (checkWin(row, col)) {
         isGameActive = false; playSound('win');
         document.querySelector(`#card-${currentPlayer} .player-status`).textContent = "WINNER! 🎉";
@@ -230,8 +209,7 @@ function makeMove(row, col, cellElement) {
     if (boardData.flat().every(cell => cell !== '')) {
         if (BOARD_SIZE === 3 || BOARD_SIZE === 30) {
             isGameActive = false; cardX.classList.remove('active'); cardO.classList.remove('active');
-            scores.draw++; localStorage.setItem('caro_scores', JSON.stringify(scores)); displayScores();
-            setTimeout(() => showWinner("Trận đấu Hòa! 🤝"), 200);
+            setTimeout(() => showWinner("Trận đấu Hòa! 🤝"), 200); // Không cộng điểm vào score nữa
         } else {
             showToast("Bàn cờ đã đầy! Đang tự động mở rộng không gian ván đấu...", "fa-expand");
             setTimeout(() => expandBoardSize(), 800);
@@ -243,66 +221,183 @@ function makeMove(row, col, cellElement) {
     updateTurnIndicator();
 
     if (isGameActive && isVsAI && currentPlayer === 'O') {
-        setTimeout(() => makeAIMove(), 300); 
+        setTimeout(() => makeAIMove(), 100); 
     }
 }
 
-// AI THÔNG MINH
-function makeAIMove() {
-    let bestScore = -1; let bestMoves = [];
+// BỘ LỌC TÌM KIẾM CÁC Ô TIỀM NĂNG GẦN QUÂN CỜ
+function getPotentialMoves() {
+    let moveSet = new Set();
+    let hasPieces = false;
+
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
-            if (boardData[r][c] === '') {
-                let attackScore = evaluatePoint(r, c, 'O');
-                let defenseScore = evaluatePoint(r, c, 'X');
-                let totalScore = attackScore * 1.2 + defenseScore;
-
-                let center = BOARD_SIZE / 2;
-                let centerBonus = (center - Math.abs(r - center)) + (center - Math.abs(c - center));
-                totalScore += centerBonus * 0.1;
-
-                if (totalScore > bestScore) { bestScore = totalScore; bestMoves = [{r, c}]; } 
-                else if (totalScore === bestScore) { bestMoves.push({r, c}); }
+            if (boardData[r][c] !== '') {
+                hasPieces = true;
+                for (let dr = -2; dr <= 2; dr++) {
+                    for (let dc = -2; dc <= 2; dc++) {
+                        let nr = r + dr, nc = c + dc;
+                        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && boardData[nr][nc] === '') {
+                            moveSet.add(`${nr},${nc}`);
+                        }
+                    }
+                }
             }
         }
     }
-    if (bestMoves.length > 0) {
-        const chosenMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
-        makeMove(chosenMove.r, chosenMove.c, null);
+
+    if (!hasPieces) {
+        let center = Math.floor(BOARD_SIZE / 2);
+        return [{r: center, c: center}];
+    }
+
+    let moves = Array.from(moveSet).map(str => {
+        let [r, c] = str.split(',').map(Number);
+        let score = evaluateStaticPoint(r, c, 'O') * 1.1 + evaluateStaticPoint(r, c, 'X');
+        return { r, c, score };
+    });
+
+    moves.sort((a, b) => b.score - a.score);
+    return moves.slice(0, 18);
+}
+
+function makeAIMove() {
+    let depth = (BOARD_SIZE === 3) ? 5 : 4; 
+    let bestScore = -Infinity;
+    let bestMove = null;
+
+    let potentialMoves = getPotentialMoves();
+
+    for (let move of potentialMoves) {
+        boardData[move.r][move.c] = 'O';
+        let score = minimaxAlphaBeta(depth - 1, -Infinity, Infinity, false, move.r, move.c);
+        boardData[move.r][move.c] = '';
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestMove = move;
+        }
+    }
+
+    if (bestMove) {
+        makeMove(bestMove.r, bestMove.c, null);
     }
 }
 
-function evaluatePoint(r, c, player) {
+function minimaxAlphaBeta(depth, alpha, beta, isMaximizing, lastR, lastC) {
+    if (checkWinStatic(lastR, lastC)) {
+        return isMaximizing ? -1000000 - depth : 1000000 + depth;
+    }
+    if (depth === 0) {
+        return evaluateGlobalBoard();
+    }
+
+    let potentialMoves = getPotentialMoves();
+    if (potentialMoves.length === 0) return 0;
+
+    if (isMaximizing) {
+        let maxEval = -Infinity;
+        for (let move of potentialMoves) {
+            boardData[move.r][move.c] = 'O';
+            let evaluation = minimaxAlphaBeta(depth - 1, alpha, beta, false, move.r, move.c);
+            boardData[move.r][move.c] = '';
+            maxEval = Math.max(maxEval, evaluation);
+            alpha = Math.max(alpha, evaluation);
+            if (beta <= alpha) break;
+        }
+        return maxEval;
+    } else {
+        let minEval = Infinity;
+        for (let move of potentialMoves) {
+            boardData[move.r][move.c] = 'X';
+            let evaluation = minimaxAlphaBeta(depth - 1, alpha, beta, true, move.r, move.c);
+            boardData[move.r][move.c] = '';
+            minEval = Math.min(minEval, evaluation);
+            beta = Math.min(beta, evaluation);
+            if (beta <= alpha) break;
+        }
+        return minEval;
+    }
+}
+
+function evaluateGlobalBoard() {
+    let total = 0;
+    for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+            if (boardData[r][c] === 'O') {
+                total += evaluateStaticPoint(r, c, 'O');
+            } else if (boardData[r][c] === 'X') {
+                total -= evaluateStaticPoint(r, c, 'X') * 1.3;
+            }
+        }
+    }
+    return total;
+}
+
+function evaluateStaticPoint(r, c, player) {
     const directions = [ {dr:0, dc:1}, {dr:1, dc:0}, {dr:1, dc:1}, {dr:1, dc:-1} ];
-    let totalScore = 0;
+    let score = 0;
 
     for (let {dr, dc} of directions) {
-        let count = 1; let openEnds = 0;
+        let count = 1;
+        let openEnds = 0;
+
         let i = 1;
         while (true) {
-            let nr = r + dr * i; let nc = c + dc * i;
+            let nr = r + dr * i, nc = c + dc * i;
             if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
-                if (boardData[nr][nc] === player) { count++; i++; } 
-                else if (boardData[nr][nc] === '') { openEnds++; break; } 
-                else { break; } 
-            } else { break; }
-        }
-        let j = 1;
-        while (true) {
-            let nr = r - dr * j; let nc = c - dc * j;
-            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
-                if (boardData[nr][nc] === player) { count++; j++; } 
-                else if (boardData[nr][nc] === '') { openEnds++; break; } 
+                if (boardData[nr][nc] === player) { count++; i++; }
+                else if (boardData[nr][nc] === '') { openEnds++; break; }
                 else { break; }
             } else { break; }
         }
 
-        if (count >= 5) totalScore += 100000;              
-        else if (count === 4) { if (openEnds === 2) totalScore += 10000; else if (openEnds === 1) totalScore += 2000; } 
-        else if (count === 3) { if (openEnds === 2) totalScore += 1500; else if (openEnds === 1) totalScore += 400; } 
-        else if (count === 2) { if (openEnds === 2) totalScore += 200; else if (openEnds === 1) totalScore += 50; }
+        let j = 1;
+        while (true) {
+            let nr = r - dr * j, nc = c - dc * j;
+            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+                if (boardData[nr][nc] === player) { count++; j++; }
+                else if (boardData[nr][nc] === '') { openEnds++; break; }
+                else { break; }
+            } else { break; }
+        }
+
+        if (count >= 5) score += 500000;
+        else if (count === 4) {
+            if (openEnds === 2) score += 50000;  
+            else if (openEnds === 1) score += 5000;
+        } else if (count === 3) {
+            if (openEnds === 2) score += 3000;   
+            else if (openEnds === 1) score += 500;
+        } else if (count === 2) {
+            if (openEnds === 2) score += 200;
+            else if (openEnds === 1) score += 40;
+        }
     }
-    return totalScore;
+    return score;
+}
+
+function checkWinStatic(r, c) {
+    const player = boardData[r][c];
+    if (!player) return false;
+    const targetCount = (BOARD_SIZE === 3) ? 3 : 5;
+    const directions = [ { dr: 0, dc: 1 }, { dr: 1, dc: 0 }, { dr: 1, dc: 1 }, { dr: 1, dc: -1 } ];
+
+    for (let { dr, dc } of directions) {
+        let count = 1;
+        let i = 1;
+        while (true) {
+            let nr = r + dr * i, nc = c + dc * i;
+            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && boardData[nr][nc] === player) { count++; i++; } else { break; }
+        }
+        let j = 1;
+        while (true) {
+            let nr = r - dr * j, nc = c - dc * j;
+            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && boardData[nr][nc] === player) { count++; j++; } else { break; }
+        }
+        if (count >= targetCount) return true;
+    }
+    return false;
 }
 
 function expandBoardSize() {
@@ -372,7 +467,7 @@ resetBtn.addEventListener('click', async () => {
 cleanBtn.addEventListener('click', async () => {
     const confirmResult = await showConfirmModal("Xóa toàn bộ tỷ số", "Đặt lại tỷ số về 0 và không thể phục hồi. Đồng ý chứ?", "danger");
     if (confirmResult) {
-        scores = { xWin: 0, xLose: 0, oWin: 0, oLose: 0, draw: 0 };
+        scores = { xWin: 0, xLose: 0, oWin: 0, oLose: 0 };
         localStorage.setItem('caro_scores', JSON.stringify(scores));
         firstPlayerOfMatch = 'X'; resetGame(); showToast("Đã xóa sạch bảng xếp hạng!", "fa-trash-can");
     }
@@ -385,7 +480,7 @@ function updateTurnIndicator() {
         cardO.querySelector('.player-status').textContent = "Chờ lượt";
     } else {
         cardO.classList.add('active'); cardX.classList.remove('active');
-        cardO.querySelector('.player-status').textContent = isVsAI ? "AI tính toán..." : "Đang nghĩ...";
+        cardO.querySelector('.player-status').textContent = isVsAI ? "AI đang tính..." : "Đang nghĩ...";
         cardX.querySelector('.player-status').textContent = "Chờ lượt";
     }
 }

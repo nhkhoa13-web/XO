@@ -28,7 +28,7 @@ const txtOWin = document.getElementById('score-o-win');
 const txtOLose = document.getElementById('score-o-lose');
 
 const SIZE_OPTIONS = [3, 15, 30]; 
-let currentSizeIndex = 1; 
+let currentSizeIndex = 0; 
 let BOARD_SIZE = SIZE_OPTIONS[currentSizeIndex]; 
 
 let isVsAI = false;           

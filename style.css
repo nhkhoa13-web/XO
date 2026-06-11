@@ -112,7 +112,6 @@ body.light-mode .control-panel {
 }
 
 .control-item { display: flex; align-items: center; gap: 6px; }
-/* .control-label { font-weight: 700; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; } */
 
 .modern-btn {
     background: var(--cell-bg);
@@ -266,61 +265,11 @@ body.light-mode .icon-btn { border-color: rgba(0,0,0,0.05); }
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     letter-spacing: 1px;
 }
-/* .dashboard  {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--dashboard-bg);
-    padding: 8px;
-    border-radius: 20px;
-    margin-bottom: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    width: 100%;
-    gap: 4px;
-    transition: background 0.4s ease;
-} */
 
-/* .vs-text { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 45px; }
-.vs-badge { font-size: 0.7rem; font-weight: 900; background: #334155; color: #94a3b8; padding: 2px 8px; border-radius: 100px; } */
 body.light-mode .vs-badge { background: #e2e8f0; color: #64748b; }
 .draw-score { font-size: 0.65rem; color: #64748b; margin-top: 4px; font-weight: 800; white-space: nowrap; }
-
-/* .player-card {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    border-radius: 14px;
-    flex: 1;
-    background: transparent;
-    border: 1px solid transparent;
-    transition: all 0.4s ease;
-    opacity: 0.25;
-    min-width: 0; /* Ngăn chặn việc chữ đẩy tràn khối */
-/* } */ */
-
-/* .player-card .avatar {
-    font-size: 1.1rem;
-    font-weight: 900;
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.2);
-} */
-/* body.light-mode .player-card .avatar { background: rgba(0, 0, 0, 0.05); }
-.player-card .X { color: #38bdf8; }
-.player-card .O { color: #f43f5e; } */
-
-/* .player-info { text-align: left; min-width: 0; overflow: hidden; }
-.player-name { font-weight: 800; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player-score { font-size: 0.7rem; color: #64748b; margin: 2px 0; font-weight: 600; white-space: nowrap; } */
 .score-sep { color: #334155; margin: 0 1px; }
 body.light-mode .score-sep { color: #cbd5e1; }
-/* .player-status { font-size: 0.6rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; white-space: nowrap; } */
 
 #card-X.active {
     opacity: 1;
@@ -328,8 +277,6 @@ body.light-mode .score-sep { color: #cbd5e1; }
     border-color: rgba(56, 189, 248, 0.3);
     box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
 }
-/* body.light-mode #card-X.active { background: rgba(2, 132, 199, 0.05); border-color: rgba(2, 132, 199, 0.3); }
-#card-X.active .player-status { color: var(--color-x); animation: pulseGlow 1.5s infinite alternate; } */
 
 #card-O.active {
     opacity: 1;
@@ -343,45 +290,50 @@ body.light-mode #card-O.active { background: rgba(225, 29, 72, 0.05); border-col
 @keyframes pulseGlow { 0% { opacity: 0.6; } 100% { opacity: 1; text-shadow: 0 0 8px currentColor; } }
 
 /* BOARD CONTAINER & WRAPPER - TỐI ƯU MOBILE */
+/* --- 1. KHỐI BỌC BÀN CỜ CHUNG (SỬA LẠI ĐỂ ẨN HOÀN TOÀN THANH CUỘN) --- */
 .board-wrapper {
     width: 100%;
-    aspect-ratio: 1 / 1; /* Đảm bảo bàn cờ luôn vuông tuyệt đối */
-    max-width: 480px; 
+    max-width: 600px; /* Giới hạn chiều rộng tối đa cân đối trên PC */
     margin: 0 auto;
-    background-color: var(--cell-border);
-    padding: 4px;
+    padding: 0.5rem;
+    overflow: hidden; /* TRIỆT TIÊU THANH CUỘN KHÔNG CHO PHÉP XUẤT HIỆN */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- 2. CẤU TRÚC BÀN CỜ TỰ KHỚP THEO KHUNG --- */
+.board {
+    display: grid;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Giữ bàn cờ luôn là hình vuông chuẩn */
+    gap: 2px; /* Khoảng cách giữa các ô cờ */
+    background: var(--cell-border);
+    padding: 2px;
     border-radius: 16px;
     box-sizing: border-box;
-    box-shadow: inset 0 4px 15px rgba(0,0,0,0.15);
-    transition: var(--smooth-elastic);
+}
+
+/* --- 3. Ô CỜ TỰ ĐỘNG CO GIÃN THÔNG MINH (KHÔNG DÙNG MIN-WIDTH CỐ ĐỊNH) --- */
+.cell {
+    width: 100%;
+    height: 100%;
+    background: var(--cell-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    box-sizing: border-box;
+    /* Font size linh hoạt tính theo kích thước ô thực tế */
+    font-size: calc(60vw / var(--board-size, 15)); 
 }
 
 /* Khi chỉnh kích thước nhỏ 3x3 */
 .container:has(.board[data-size="3"]) .board-wrapper { 
     max-width: min(240px, 60vw); 
-}
-
-.board { 
-    display: grid; 
-    gap: 1px; /* Đường phân tách mảnh nhỏ hiện đại */
-    width: 100%; 
-    height: 100%; 
-}
-
-/* CELL Ô CỜ CHUẨN ĐÁNH CẢM ỨNG */
-.cell {
-    background-color: var(--cell-bg);
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 800;
-    user-select: none;
-    border-radius: 2px; /* Bo góc cực nhẹ tạo chiều sâu lưới phát sáng */
-    transition: var(--smooth-fast), background-color 0.4s ease;
-    min-width: 0; min-height: 0;
 }
 
 /* Tối ưu kích thước chữ quân cờ theo từng loại map */
@@ -611,16 +563,17 @@ body.light-mode .modal-content { border-color: rgba(0,0,0,0.05); }
         font-size: 0.9rem;
     }
 
-    /* Tối ưu kích thước ô cờ trên mobile không bị tràn màn hình */
     .board-wrapper {
+        max-width: 100%; /* Trên mobile sẽ chiếm trọn bề ngang màn hình */
         padding: 0.25rem;
-        overflow-x: auto; /* Cho phép vuốt ngang nếu map 30x30 quá lớn */
+        overflow: hidden; /* Đảm bảo tuyệt đối không sinh scrollbar dọc/ngang */
     }
 
     .cell {
-        font-size: calc(100vw / var(--board-size, 15) - 8px); 
-        min-width: 25px;
-        min-height: 25px;
+        /* Xóa bỏ min-width và min-height cũ nếu có để tránh đẩy phình bàn cờ */
+        min-width: 0 !important; 
+        min-height: 0 !important;
+        font-size: calc(75vw / var(--board-size, 15)); /* Tối ưu font chữ X, O vừa vặn */
     }
 }
 /* RESPONSIVE TRƯỜNG HỢP MÀN HÌNH SIÊU NHỎ (DƯỚI 360PX) */

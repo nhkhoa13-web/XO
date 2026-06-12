@@ -239,11 +239,14 @@ function makeMove(row, col, cellElement) {
     }
 }
 
-// BỘ LỌC TÌM KIẾM CÁC Ô TIỀM NĂNG GẦN QUÂN CỜ
+// ==================== SIÊU AI NÂNG CẤP CHUYÊN SÂU ====================
+
+// Bộ lọc tìm kiếm các ô tiềm năng xung quanh các quân cờ đã đánh
 function getPotentialMoves() {
     let moveSet = new Set();
     let hasPieces = false;
 
+    // Quét toàn bộ bàn cờ để tìm các ô trống trong phạm vi 2 ô xung quanh quân đã có
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
             if (boardData[r][c] !== '') {
@@ -260,31 +263,46 @@ function getPotentialMoves() {
         }
     }
 
+    // Nếu bàn cờ trống, ưu tiên đánh ngay chính giữa
     if (!hasPieces) {
         let center = Math.floor(BOARD_SIZE / 2);
-        return [{r: center, c: center}];
+        return [{r: center, c: center, score: 1000}];
     }
 
+    // Chuyển Set thành mảng và đánh giá sơ bộ điểm số để lọc ra các ô tốt nhất
     let moves = Array.from(moveSet).map(str => {
         let [r, c] = str.split(',').map(Number);
-        let score = evaluateStaticPoint(r, c, 'O') * 1.1 + evaluateStaticPoint(r, c, 'X');
-        return { r, c, score };
+        // Điểm kết hợp: Ưu tiên tối đa cho việc vừa Tấn công vừa chặn đứng Phòng ngự
+        let scoreAI = evaluateStaticPoint(r, c, 'O');
+        let scoreHuman = evaluateStaticPoint(r, c, 'X');
+        
+        // Trọng số chiến thuật: Kết hợp khôn ngoan giữa Công và Thủ
+        let combinedScore = scoreAI + scoreHuman * 0.95;
+        return { r, c, score: combinedScore };
     });
 
+    // Sắp xếp giảm dần theo điểm số
     moves.sort((a, b) => b.score - a.score);
-    return moves.slice(0, 18);
+    
+    // Cắt tỉa (Pruning): Chỉ lấy tối đa 8 nước đi tốt nhất để đi sâu tính toán, tránh treo máy
+    return moves.slice(0, 8);
 }
 
+// Hàm kích hoạt nước đi của AI
 function makeAIMove() {
-    let depth = (BOARD_SIZE === 3) ? 5 : 4; 
+    // Tăng độ sâu tính toán: Bản 3x3 tính hết 10 bước, bản lớn tính sâu tối ưu
+    let depth = (BOARD_SIZE === 3) ? 10 : 6; 
     let bestScore = -Infinity;
     let bestMove = null;
 
     let potentialMoves = getPotentialMoves();
 
     for (let move of potentialMoves) {
+        // Giả lập AI đánh thử
         boardData[move.r][move.c] = 'O';
+        // Tính toán phản ứng của đối thủ qua nhiều bước đi bằng thuật toán Minimax Alpha-Beta
         let score = minimaxAlphaBeta(depth - 1, -Infinity, Infinity, false, move.r, move.c);
+        // Trả lại trạng thái bàn cờ
         boardData[move.r][move.c] = '';
 
         if (score > bestScore) {
@@ -293,15 +311,19 @@ function makeAIMove() {
         }
     }
 
+    // Thực hiện nước đi tối ưu và tinh quái nhất tìm được
     if (bestMove) {
         makeMove(bestMove.r, bestMove.c, null);
     }
 }
 
+// Thuật toán duyệt cây tính trước nước đi có cắt tỉa Alpha-Beta
 function minimaxAlphaBeta(depth, alpha, beta, isMaximizing, lastR, lastC) {
+    // Nếu nước đi trước đó dẫn đến chiến thắng đổi trạng thái điểm số cực đại
     if (checkWinStatic(lastR, lastC)) {
-        return isMaximizing ? -1000000 - depth : 1000000 + depth;
+        return isMaximizing ? -20000000 - depth : 20000000 + depth;
     }
+    // Nếu chạm đến giới hạn bước tính toán trước hoặc hết ô trống, trả về điểm thực tế của bàn cờ
     if (depth === 0) {
         return evaluateGlobalBoard();
     }
@@ -317,7 +339,7 @@ function minimaxAlphaBeta(depth, alpha, beta, isMaximizing, lastR, lastC) {
             boardData[move.r][move.c] = '';
             maxEval = Math.max(maxEval, evaluation);
             alpha = Math.max(alpha, evaluation);
-            if (beta <= alpha) break;
+            if (beta <= alpha) break; // Cắt nhánh Alpha
         }
         return maxEval;
     } else {
@@ -328,44 +350,52 @@ function minimaxAlphaBeta(depth, alpha, beta, isMaximizing, lastR, lastC) {
             boardData[move.r][move.c] = '';
             minEval = Math.min(minEval, evaluation);
             beta = Math.min(beta, evaluation);
-            if (beta <= alpha) break;
+            if (beta <= alpha) break; // Cắt nhánh Beta
         }
         return minEval;
     }
 }
 
+// Hàm lượng giá toàn bộ cục diện bàn cờ từ góc nhìn của AI
 function evaluateGlobalBoard() {
-    let total = 0;
+    let totalScore = 0;
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
             if (boardData[r][c] === 'O') {
-                total += evaluateStaticPoint(r, c, 'O');
+                totalScore += evaluateStaticPoint(r, c, 'O');
             } else if (boardData[r][c] === 'X') {
-                total -= evaluateStaticPoint(r, c, 'X') * 1.3;
+                totalScore -= evaluateStaticPoint(r, c, 'X') * 1.15; // Đánh giá cao mối nguy hiểm từ người chơi
             }
         }
     }
-    return total;
+    return totalScore;
 }
 
+// HỆ THỐNG ĐIỂM CHIẾN THUẬT: ĐỊNH NGHĨA CÁC THẾ CỜ CÔNG, THỦ VÀ ĐÁNH LỪA (BẪY)
 function evaluateStaticPoint(r, c, player) {
     const directions = [ {dr:0, dc:1}, {dr:1, dc:0}, {dr:1, dc:1}, {dr:1, dc:-1} ];
     let score = 0;
+    
+    // Đếm số lượng đường tạo bẫy nước đôi (Ví dụ: đồng thời tạo 2 đường 3 mở hoặc đường 4)
+    let openThrees = 0;
+    let openFours = 0;
 
     for (let {dr, dc} of directions) {
         let count = 1;
         let openEnds = 0;
 
+        // Quét theo chiều tiến
         let i = 1;
         while (true) {
             let nr = r + dr * i, nc = c + dc * i;
             if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
                 if (boardData[nr][nc] === player) { count++; i++; }
                 else if (boardData[nr][nc] === '') { openEnds++; break; }
-                else { break; }
-            } else { break; }
+                else { break; } // Bị chặn bởi đối thủ
+            } else { break; } // Chạm biên bàn cờ
         }
 
+        // Quét theo chiều lùi
         let j = 1;
         while (true) {
             let nr = r - dr * j, nc = c - dc * j;
@@ -376,18 +406,38 @@ function evaluateStaticPoint(r, c, player) {
             } else { break; }
         }
 
-        if (count >= 5) score += 500000;
-        else if (count === 4) {
-            if (openEnds === 2) score += 50000;  
-            else if (openEnds === 1) score += 5000;
+        // --- HỆ THỐNG CỘNG ĐIỂM CHIẾN THUẬT CHUYÊN SÂU ---
+        if (count >= 5) {
+            score += 10000000; // Đánh nước này là thắng luôn ngay lập tức
+        } else if (count === 4) {
+            if (openEnds === 2) {
+                score += 500000; // Đường 4 mở 2 đầu (vô địch, không thể chặn)
+                openFours++;
+            } else if (openEnds === 1) {
+                score += 100000; // Đường 4 bị chặn 1 đầu, đối thủ bắt buộc phải chặn đầu còn lại
+            }
         } else if (count === 3) {
-            if (openEnds === 2) score += 3000;   
-            else if (openEnds === 1) score += 500;
+            if (openEnds === 2) {
+                score += 10000; // Đường 3 mở 2 đầu cực nguy hiểm
+                openThrees++;
+            } else if (openEnds === 1) {
+                score += 1000;
+            }
         } else if (count === 2) {
             if (openEnds === 2) score += 200;
             else if (openEnds === 1) score += 40;
         }
     }
+
+    // --- LOGIC KIẾN TẠO NƯỚC ĐÁNH LỪA / TẠO BẪY ĐỐI THỦ ---
+    // Nếu nước đi tạo ra thế nước đôi nguy hiểm (Ví dụ: 2 đường 3 mở cùng lúc, hoặc kết hợp 3 mở và 4)
+    if (openThrees >= 2) {
+        score += 300000; // Bẫy chí mạng "Double Three" - Buộc đối thủ rơi vào bẫy toán học không thể hóa giải
+    }
+    if (openFours >= 1 && openThrees >= 1) {
+        score += 400000; // Bẫy cực mạnh kết hợp tấn công dồn dập
+    }
+
     return score;
 }
 
